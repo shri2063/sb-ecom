@@ -37,7 +37,7 @@ public class CategoryController
         return new ResponseEntity<>("Category created successfully", HttpStatus.CREATED);
     }
 
-    @PutMapping("/api/admin/categories")
+    @PutMapping("/api/public/categories")
     public ResponseEntity<Category> updateCategory(@RequestBody Category category)
     {
         try {
