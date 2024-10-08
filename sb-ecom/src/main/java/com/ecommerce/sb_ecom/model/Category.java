@@ -1,15 +1,14 @@
 package com.ecommerce.sb_ecom.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 
 @Entity(name = "categories")
@@ -24,19 +23,11 @@ public class Category
     @NotBlank(message = "Must not be blank")
     @Size(min = 5, message = "Category name nust contain atleast 5 characters")
     private String categoryName;
+    @OneToMany(mappedBy = "category")
+    private List<Product> products;
 
 
-    public Long getCategoryId() {
-        return categoryId;
-    }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;

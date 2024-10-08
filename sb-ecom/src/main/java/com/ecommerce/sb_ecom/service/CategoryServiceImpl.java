@@ -6,11 +6,13 @@ import com.ecommerce.sb_ecom.model.Category;
 import com.ecommerce.sb_ecom.payload.CategoryDTO;
 import com.ecommerce.sb_ecom.payload.CategoryResponse;
 import com.ecommerce.sb_ecom.repositories.CategoryRepository;
+import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.stereotype.Service;
@@ -34,10 +36,13 @@ public class CategoryServiceImpl implements CategoryService
     }
 
     @Override
-    public CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public CategoryResponse getAllCategories( Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
 
-        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Sort sort = sortOrder.equalsIgnoreCase("asc")?
+                Sort.by(sortBy).ascending():
+                Sort.by(sortBy).descending();
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize,sort);
         Page<Category> categoryPage = categoryRepository.findAll(pageRequest);
         List<Category> categories =categoryPage.getContent();
         List<CategoryDTO> categoryDTOS = categories
