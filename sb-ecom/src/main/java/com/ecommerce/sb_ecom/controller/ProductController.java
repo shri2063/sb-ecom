@@ -4,11 +4,14 @@ import com.ecommerce.sb_ecom.model.Product;
 import com.ecommerce.sb_ecom.payload.ProductDTO;
 import com.ecommerce.sb_ecom.payload.ProductResponse;
 import com.ecommerce.sb_ecom.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -20,9 +23,9 @@ public class ProductController
     @Autowired
     ProductService productService;
     @PostMapping("/api/admin/categories/{categoryId}/product")
-    public ResponseEntity<ProductDTO> addProduct(@PathVariable("categoryId") Long categoryId, @RequestBody Product product)
+    public ResponseEntity<ProductDTO> addProduct(@Valid  @PathVariable("categoryId") Long categoryId, @RequestBody ProductDTO productDTO)
     {
-        return new ResponseEntity<>(productService.addProductToCategory(product, categoryId), HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.addProductToCategory(productDTO, categoryId), HttpStatus.CREATED);
     }
     @GetMapping ("/api/public/products")
     public ResponseEntity<ProductResponse> getAllProducts(
@@ -55,13 +58,28 @@ public class ProductController
             @RequestParam("sortOrder") String sortOrder
     )
     {
-        return ok(productService.getProductByKeyword(keyword,pageNumber,pageLength,sortBy,sortOrder));
+        ProductResponse response = productService.getProductByKeyword(keyword,pageNumber,pageLength,sortBy,sortOrder);
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     @PutMapping("/api/products/{productId}")
-    public ResponseEntity<ProductDTO> updateProduct(Product product)
+    public ResponseEntity<ProductDTO> updateProduct(@Valid @PathVariable Long productId, ProductDTO productDTO)
     {
-        return ok(productService.updateProduct(product));
+        ProductDTO updatedProductDTO = productService.updateProduct(productId, productDTO);
+        return new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/admin/products/{productId}")
+    public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long productId){
+        ProductDTO deletedProduct = productService.deleteProduct(productId);
+        return new ResponseEntity<>(deletedProduct, HttpStatus.OK);
+    }
+
+    @PutMapping("/products/{productId}/image")
+    public ResponseEntity<ProductDTO> updateProductImage(@PathVariable Long productId,
+                                                         @RequestParam("image") MultipartFile image) throws IOException {
+        ProductDTO updatedProduct = productService.updateProductImage(productId, image);
+        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 
 }

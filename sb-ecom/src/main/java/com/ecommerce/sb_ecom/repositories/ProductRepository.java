@@ -18,6 +18,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>
     @Query("SELECT p FROM Product p WHERE p.category.categoryName = :categoryId")
     Page<Product> findByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
 
-    @Query("SELECT p from Product p WHERE p.name lIKE %:keyword%")
+    Page<Product> findByCategoryOrderByPrice(Category category, Pageable pageable);
+    Page<Product> findByProductNameLikeIgnoreCase(String keyword, Pageable pageable);
+
+    @Query("SELECT p from Product p WHERE p.productName lIKE %:keyword%")
     Page<Product> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

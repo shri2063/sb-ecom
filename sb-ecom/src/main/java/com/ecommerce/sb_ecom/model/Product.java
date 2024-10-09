@@ -12,12 +12,22 @@ public class Product
 {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    @Size(min = 5, message = "Name of product should be of atleast size 5 ")
-    @NotBlank(message =  "product name should not be blank")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long productId;
 
-    String name;
+    @NotBlank
+    @Size(min = 3, message = "Product name must contain atleast 3 characters")
+    private String productName;
+    private String image;
+
+    @NotBlank
+    @Size(min = 6, message = "Product description must contain atleast 6 characters")
+    private String description;
+    private Integer quantity;
+    private double price;
+    private double discount;
+    private double specialPrice;
+
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
