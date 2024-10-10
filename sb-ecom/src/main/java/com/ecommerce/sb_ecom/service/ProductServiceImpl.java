@@ -33,7 +33,7 @@ public class ProductServiceImpl implements ProductService
     private CategoryRepository categoryRepository;
     @Autowired
     private ModelMapper modelMapper;
-    @Value("${project.image}")
+    @Value("123")
     private String path;
 
 
