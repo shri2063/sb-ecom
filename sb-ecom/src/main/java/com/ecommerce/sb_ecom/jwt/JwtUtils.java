@@ -16,16 +16,15 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 
-import static jdk.internal.org.jline.keymap.KeyMap.key;
+
 
 @Component
 public class JwtUtils
 {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-    @Value("${spring.app.jwtSecret}")
+    @Value("${jwtSecret}")
     private String jwtSecret;
-    @Value("$(spring.app.jwtExpirations)")
-    private String jwtExpirations;
+
 
     public String getJwtFromHeader(HttpServletRequest request)
     {
@@ -45,7 +44,7 @@ public class JwtUtils
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
-                .expiration(new Date(new Date().getTime() + jwtExpirations))
+                //.expiration(new Date(new Date().getTime() +  60*1000000000 ))
                 .signWith(key())
                 .compact();
     }
