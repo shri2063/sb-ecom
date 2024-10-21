@@ -3,11 +3,14 @@ package com.ecommerce.sb_ecom.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.Generated;
+import lombok.*;
 
 @Data
 @Entity
+@ToString
+@Table(name = "products")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Product
 {
 
@@ -31,6 +34,9 @@ public class Product
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private ClientUser seller;
 
 
 
