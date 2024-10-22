@@ -1,6 +1,8 @@
 package com.ecommerce.sb_ecom.controller;
 
 import com.ecommerce.sb_ecom.jwt.JwtUtils;
+import com.ecommerce.sb_ecom.jwt.LoginRequest;
+import com.ecommerce.sb_ecom.jwt.LoginResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,20 +78,6 @@ public class SecurityController
         LoginResponse loginResponse = new LoginResponse(jwtToken,userDetails.getUsername(), roles);
         return ResponseEntity.ok(loginResponse);
     }
-    @Data
-    private static class LoginRequest
-    {
-        private String username;
-        private String password;
 
-    }
-    @AllArgsConstructor
-    @Data
-    private static class LoginResponse
-    {
-        private  String jwtToken;
-        private String username;
-        private List<String> roles;
 
-    }
 }
