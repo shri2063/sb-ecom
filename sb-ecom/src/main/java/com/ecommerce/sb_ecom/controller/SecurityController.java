@@ -2,21 +2,17 @@ package com.ecommerce.sb_ecom.controller;
 
 import com.ecommerce.sb_ecom.jwt.JwtUtils;
 import com.ecommerce.sb_ecom.jwt.LoginRequest;
-import com.ecommerce.sb_ecom.jwt.LoginResponse;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.ecommerce.sb_ecom.jwt.UserInfoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 
@@ -75,7 +70,7 @@ public class SecurityController
                 .stream()
                 .map(item -> item.getAuthority())
                 .toList();
-        LoginResponse loginResponse = new LoginResponse(jwtToken,userDetails.getUsername(), roles);
+        UserInfoResponse loginResponse = new UserInfoResponse(1L,jwtToken,userDetails.getUsername(), roles);
         return ResponseEntity.ok(loginResponse);
     }
 

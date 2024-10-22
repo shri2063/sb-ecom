@@ -7,11 +7,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
@@ -38,36 +40,53 @@ public class SecurityConfig implements Serializable
     DataSource dataSource;
     @Autowired
     private AuthEntryPointJwt unAuthorizedHandler;
+    @Autowired
+    UserDetailsServiceImpl userDetailsServiceImpl;
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-
     @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter()
+    public DaoAuthenticationProvider daoAuthenticationProvider()
     {
-        return new AuthTokenFilter();
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsServiceImpl);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+
     }
+
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((requests) -> {
-            requests.requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/signin").permitAll()
+            requests.requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/v3/api-docs/**").permitAll()
+                    .requestMatchers("/api/admin/**").permitAll()
+                    .requestMatchers("/api/public/**").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/api/test/**").permitAll()
+                    .requestMatchers("/images/**").permitAll()
                     .anyRequest().authenticated();
         });
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.exceptionHandling(ex -> ex.authenticationEntryPoint(unAuthorizedHandler) );
 
         //http.formLogin(Customizer.withDefaults());
-        http.httpBasic(Customizer.withDefaults());
+        //http.httpBasic(Customizer.withDefaults());
         http.headers(headers ->
                 headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         http.csrf(AbstractHttpConfigurer::disable);
+        http.authenticationProvider(daoAuthenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return (SecurityFilterChain)http.build();
     }
 
+    @Bean
+    public AuthTokenFilter authenticationJwtTokenFilter()
+    {
+        return new AuthTokenFilter();
+    }
     @Bean
     public UserDetailsService userDetailsService()
     {
@@ -100,6 +119,19 @@ public class SecurityConfig implements Serializable
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer()
+    {
+        return (web -> web.ignoring()
+                .requestMatchers(
+                        "/v2/api-docs",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/swagger-ui.html",
+                        "/webjars/**"
+                ));
     }
 
 }

@@ -6,8 +6,9 @@ import lombok.Data;
 import java.util.List;
 @AllArgsConstructor
 @Data
-public class LoginResponse
+public class UserInfoResponse
 {
+    private Long id;
     private  String jwtToken;
     private String username;
     private List<String> roles;

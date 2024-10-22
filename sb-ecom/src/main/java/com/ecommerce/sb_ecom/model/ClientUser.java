@@ -9,9 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.NotBlank;
 
-import javax.swing.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -41,7 +39,7 @@ public class ClientUser
     @NotBlank
     @Size(min = 5, message = "user name should be atleast of length 5")
     @Column(name = "username")
-    String userName;
+    String username;
 
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -70,11 +68,13 @@ public class ClientUser
     )
     Set<Address> addresses = new HashSet<>();
 
-    public ClientUser(Long id, String email, String password, String userName, Set<Role> roles) {
-        this.id = id;
+
+
+    public ClientUser(String email, String password, String userName, Set<Role> roles) {
+
         this.email = email;
         this.password = password;
-        this.userName = userName;
+        this.username = userName;
         this.roles = roles;
     }
 
