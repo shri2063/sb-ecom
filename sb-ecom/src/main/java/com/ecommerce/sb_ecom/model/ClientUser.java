@@ -15,7 +15,7 @@ import java.util.Set;
 @Data
 @Entity
 @Table(
-        name = "clent-users",
+        name = "client-users",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames =  "username"),
                 @UniqueConstraint(columnNames = "email")
@@ -33,11 +33,11 @@ public class ClientUser
     String email;
     @Column(name = "password")
     @NotBlank
-    @Size(min = 5, message = "Password should be atleast of length 5")
+    @Size(min = 1, message = "Password should be atleast of length 5")
 
     String password;
     @NotBlank
-    @Size(min = 5, message = "user name should be atleast of length 5")
+    @Size(min = 1, message = "user name should be atleast of length 5")
     @Column(name = "username")
     String username;
 
@@ -78,7 +78,17 @@ public class ClientUser
         this.roles = roles;
     }
 
+    public ClientUser(String email, String password, String userName) {
+
+        this.email = email;
+        this.password = password;
+        this.username = userName;
+
+    }
+
     public ClientUser() {
 
     }
+
+
 }
