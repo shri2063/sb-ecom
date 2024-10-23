@@ -3,35 +3,26 @@ package com.ecommerce.sb_ecom.security;
 import com.ecommerce.sb_ecom.jwt.AuthEntryPointJwt;
 import com.ecommerce.sb_ecom.jwt.AuthTokenFilter;
 import com.ecommerce.sb_ecom.model.AppRole;
-import com.ecommerce.sb_ecom.model.ClientUser;
+import com.ecommerce.sb_ecom.model.User;
 import com.ecommerce.sb_ecom.model.Role;
-import com.ecommerce.sb_ecom.repositories.ClientUserRepository;
+import com.ecommerce.sb_ecom.repositories.UserRepository;
 import com.ecommerce.sb_ecom.repositories.RolesRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -78,7 +69,7 @@ public class SecurityConfig implements Serializable
                     .requestMatchers("/v3/api-docs/**").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/api/admin/**").permitAll()
-                    .requestMatchers("/api/public/**").permitAll()
+                    //.requestMatchers("/api/public/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
                     .requestMatchers("/api/test/**").permitAll()
                     .requestMatchers("/images/**").permitAll()
@@ -104,10 +95,12 @@ public class SecurityConfig implements Serializable
     }
 
 
+
     @Bean
     @Transactional
+
     public CommandLineRunner initData(RolesRepository rolesRepository,
-                                      ClientUserRepository userRepository, PasswordEncoder passwordEncoder)
+                                      UserRepository userRepository, PasswordEncoder passwordEncoder)
     {
         return args -> {
             Role userRole = rolesRepository.findByRoleName(AppRole.ROLE_USER)
@@ -132,24 +125,45 @@ public class SecurityConfig implements Serializable
                         return rolesRepository.findByRoleName(AppRole.ROLE_SELLER).get();
                     });
 
-            //userRole = entityManager.merge(userRole);
-            //adminRole = entityManager.merge(adminRole);
-            //sellerRole = entityManager.merge(sellerRole);
-            userRole = rolesRepository.findByRoleName(AppRole.ROLE_USER).get();
             Set<Role> userRoleSet = Set.of(userRole);
-            Set<Role> adminRoleSet = Set.of(adminRole);
+            Set<Role> adminRoleSet = Set.of(userRole);
             Set<Role> sellerRoleSet = Set.of(sellerRole);
+            if (!userRepository.existsByUsername("user1")) {
+                User user1 = new User("user1",  passwordEncoder.encode("password1"),"user1@example.com");
+                userRepository.save(user1);
+            }
+            // Update roles for existing users
+            userRepository.findByUsername("user1").ifPresent(user -> {
+                user.setRoles(userRoleSet);
+                userRepository.save(user);
+            });
 
-            ClientUser user = new ClientUser("user@user","user", "user", userRoleSet);
-            ClientUser admin = new ClientUser("admin@admin","admin", "admin");
-            ClientUser seller = new ClientUser("seller@seller","seller", "seller");
-            userRepository.save(user);
-            userRepository.save(admin);
-            userRepository.save(seller);
+            if (!userRepository.existsByUsername("seller1")) {
+                User seller1 = new User("seller1",  passwordEncoder.encode("password2"),"seller1@example.com");
+                userRepository.save(seller1);
+            }
+
+            if (!userRepository.existsByUsername("admin")) {
+                User admin = new User("admin", passwordEncoder.encode("adminPass"),"admin@example.com");
+                userRepository.save(admin);
+            }
+            userRepository.findByUsername("seller1").ifPresent(seller -> {
+                seller.setRoles(sellerRoleSet);
+                userRepository.save(seller);
+            });
+
+            userRepository.findByUsername("admin").ifPresent(admin -> {
+                admin.setRoles(adminRoleSet);
+                userRepository.save(admin);
+            });
+
+
 
 
         };
     }
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -1,6 +1,6 @@
 package com.ecommerce.sb_ecom.security;
 
-import com.ecommerce.sb_ecom.model.ClientUser;
+import com.ecommerce.sb_ecom.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,7 +32,8 @@ public class UserDetailsImpl implements UserDetails {
         this.email = email;
         this.authorities = authorities;
     }
-    public static UserDetailsImpl build(ClientUser user) {
+
+    public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
                 .collect(Collectors.toList());
@@ -42,7 +43,12 @@ public class UserDetailsImpl implements UserDetails {
                 user.getPassword(),
                 user.getEmail(),
                 authorities);
+
+
+
     }
+
+
 
 
     @Override

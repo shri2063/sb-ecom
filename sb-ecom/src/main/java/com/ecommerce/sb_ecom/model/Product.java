@@ -36,7 +36,7 @@ public class Product
     private Category category;
     @ManyToOne
     @JoinColumn(name = "seller_id")
-    private ClientUser seller;
+    private User user;
 
 
 

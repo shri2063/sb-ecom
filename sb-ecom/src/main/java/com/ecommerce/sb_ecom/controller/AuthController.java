@@ -5,9 +5,9 @@ import com.ecommerce.sb_ecom.jwt.LoginRequest;
 import com.ecommerce.sb_ecom.jwt.SignupRequest;
 import com.ecommerce.sb_ecom.jwt.UserInfoResponse;
 import com.ecommerce.sb_ecom.model.AppRole;
-import com.ecommerce.sb_ecom.model.ClientUser;
+import com.ecommerce.sb_ecom.model.User;
 import com.ecommerce.sb_ecom.model.Role;
-import com.ecommerce.sb_ecom.repositories.ClientUserRepository;
+import com.ecommerce.sb_ecom.repositories.UserRepository;
 import com.ecommerce.sb_ecom.repositories.RolesRepository;
 import com.ecommerce.sb_ecom.security.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -19,7 +19,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,15 +40,16 @@ public class AuthController
     @Autowired
     JwtUtils jwtUtils;
     @Autowired
-    ClientUserRepository clientUserRepository;
+    UserRepository clientUserRepository;
     @Autowired
     RolesRepository rolesRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid LoginRequest request)
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest request)
     {
+        System.out.println(request.getUsername());
         try
         {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -75,8 +75,9 @@ public class AuthController
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signupUser(@Valid SignupRequest request)
+    public ResponseEntity<?> signupUser(@Valid @RequestBody SignupRequest request)
     {
+        System.out.println("hiii");
         if(clientUserRepository.existsByUsername(request.getUsername()))
         {
             return ResponseEntity.badRequest().body("UserName already exists" );
@@ -118,10 +119,13 @@ public class AuthController
           });
         }
 
-        ClientUser newUser = new ClientUser(request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getUsername(), roles);
+        User newUser = new User(request.getUsername(), passwordEncoder.encode(request.getPassword()), request.getEmail());
+        newUser.setRoles(roles);
         clientUserRepository.save(newUser);
         return ResponseEntity.ok("Success");
 
     }
+
+
 
 }

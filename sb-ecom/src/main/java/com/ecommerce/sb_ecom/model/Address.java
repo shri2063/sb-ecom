@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
 
@@ -48,7 +47,7 @@ public class Address
     private String pincode;
     @ToString.Exclude
     @ManyToMany(mappedBy = "addresses")
-    private Set<ClientUser> users;
+    private Set<User> users;
 
 
     public Address(Long id, String street, String buildingName, String city, String state, String country, String pincode) {

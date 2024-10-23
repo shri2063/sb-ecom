@@ -25,11 +25,15 @@ public class Role
     @ToString.Exclude
     @Enumerated(EnumType.STRING)
     private AppRole roleName;
-    @ManyToMany(mappedBy = "roles")
-    private Set<ClientUser> users = new HashSet<>();
+
 
 
     public Role(AppRole roleName) {
         this.roleName = roleName;
     }
+
+
+
+
+
 }
