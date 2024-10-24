@@ -7,6 +7,7 @@ import com.ecommerce.sb_ecom.model.User;
 import com.ecommerce.sb_ecom.model.Role;
 import com.ecommerce.sb_ecom.repositories.UserRepository;
 import com.ecommerce.sb_ecom.repositories.RolesRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,12 +127,13 @@ public class SecurityConfig implements Serializable
                     });
 
             Set<Role> userRoleSet = Set.of(userRole);
-            Set<Role> adminRoleSet = Set.of(userRole);
+            Set<Role> adminRoleSet = Set.of(adminRole);
             Set<Role> sellerRoleSet = Set.of(sellerRole);
             if (!userRepository.existsByUsername("user1")) {
                 User user1 = new User("user1",  passwordEncoder.encode("password1"),"user1@example.com");
                 userRepository.save(user1);
             }
+
             // Update roles for existing users
             userRepository.findByUsername("user1").ifPresent(user -> {
                 user.setRoles(userRoleSet);

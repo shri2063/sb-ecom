@@ -1,16 +1,22 @@
 package com.ecommerce.sb_ecom.jwt;
 
+import com.ecommerce.sb_ecom.security.UserDetailsImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -24,7 +30,8 @@ public class JwtUtils
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     @Value("${jwtSecret}")
     private String jwtSecret;
-
+    @Value("${jwtCookieName}")
+    private String jwtCookie;
 
     public String getJwtFromHeader(HttpServletRequest request)
     {
@@ -38,7 +45,29 @@ public class JwtUtils
 
     }
 
-    public  String generateTokenFromUsername(UserDetails userDetails)
+    public String getJwtFromCookies(HttpServletRequest request)
+    {
+        Cookie cookie = WebUtils.getCookie(request,jwtCookie);
+        if(cookie != null)
+        {
+            return cookie.getValue();
+        }
+        else {
+            return null;
+        }
+    }
+
+    public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal)
+    {
+      String jwt = generateTokenFromUsername(userPrincipal);
+      ResponseCookie cookie = ResponseCookie.from(jwtCookie, jwt).
+              path("/api") .
+              maxAge(24*60*60) .
+              httpOnly(false).
+              build();
+      return cookie;
+    }
+    private   String generateTokenFromUsername(UserDetails userDetails)
     {
         String username = userDetails.getUsername();
         return Jwts.builder()
@@ -49,6 +78,11 @@ public class JwtUtils
                 .compact();
     }
 
+    public ResponseCookie getCLeanJwtCookie()
+    {
+        ResponseCookie responseCookie = ResponseCookie.from(jwtCookie,null).path("/api").build();
+        return responseCookie;
+    }
     public String getUserNameFromJwtToken(String token)
     {
         return Jwts.parser()
@@ -58,7 +92,7 @@ public class JwtUtils
                 .getPayload()
                 .getSubject();
     }
-    public static final io. jsonwebtoken. io. Decoder<CharSequence, byte[]> BASE63 = null;
+
     private Key key()
     {
      return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));

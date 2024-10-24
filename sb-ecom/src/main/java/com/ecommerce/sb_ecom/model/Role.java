@@ -1,10 +1,7 @@
 package com.ecommerce.sb_ecom.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +22,6 @@ public class Role
     @ToString.Exclude
     @Enumerated(EnumType.STRING)
     private AppRole roleName;
-
 
 
     public Role(AppRole roleName) {

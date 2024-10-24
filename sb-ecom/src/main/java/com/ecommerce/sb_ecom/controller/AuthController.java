@@ -10,20 +10,23 @@ import com.ecommerce.sb_ecom.model.Role;
 import com.ecommerce.sb_ecom.repositories.UserRepository;
 import com.ecommerce.sb_ecom.repositories.RolesRepository;
 import com.ecommerce.sb_ecom.security.UserDetailsImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +49,21 @@ public class AuthController
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @GetMapping("/user")
+    public ResponseEntity<String> currentUsername(Authentication authentication)
+    {
+
+            if(authentication != null)
+            {
+                return ResponseEntity.ok(authentication.getName());
+            }
+            else
+            {
+                return ResponseEntity.ok("NuLL");
+            }
+
+
+    }
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest request)
     {
@@ -56,14 +74,16 @@ public class AuthController
                     request.getUsername(), request.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-            String token = jwtUtils.generateTokenFromUsername(userDetails);
+            ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
             List<String> roles = authentication.getAuthorities()
                     .stream()
                     .map(GrantedAuthority::getAuthority)
                     .toList();
-            UserInfoResponse response = new UserInfoResponse(userDetails.getId(),token,  userDetails.getUsername(),roles);
+            UserInfoResponse response = new UserInfoResponse(userDetails.getId(),  userDetails.getUsername(),roles);
 
-            return new ResponseEntity<>(response,HttpStatus.OK);
+            return  ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE,jwtCookie.toString())
+                    .body(response);
 
         }
         catch(Exception ex)
@@ -123,6 +143,15 @@ public class AuthController
         newUser.setRoles(roles);
         clientUserRepository.save(newUser);
         return ResponseEntity.ok("Success");
+
+    }
+    @PostMapping("/signout")
+    public ResponseEntity<?> signout()
+    {
+        ResponseCookie cookie = jwtUtils.getCLeanJwtCookie();
+        return  ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,cookie.toString())
+                .body("Cookie invalidated");
 
     }
 
